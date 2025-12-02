@@ -8,7 +8,7 @@
   },
   "include": [
     "src/**/*.ts"
-  ],
+, "src/app/features/list-task/models/task.model.ts"  ],
   "exclude": [
     "src/**/*.spec.ts"
   ]

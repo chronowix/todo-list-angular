@@ -1,0 +1,22 @@
+<h3>Liste des tâches</h3>
+
+<section>
+<ul>
+<li>
+@for (task of tasks; track task.title) {
+<app-todo-item
+      [id]="task.id"
+      [title]="task.title"
+      [status]="task.status"
+      (delete)="deleteTask(task.id)"
+      (toggle)="toggleTaskStatus(task.id)">
+</app-todo-item>
+}
+</li>
+</ul>
+<h3>Ajouter une tâche</h3>
+
+<input type="text" [(ngModel)]="newTaskTitle" placeholder="Titre de la tâche">
+<button (click)="addTask(newTaskTitle)">Ajouter</button>
+
+</section>
