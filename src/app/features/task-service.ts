@@ -1,63 +1,50 @@
 import { Injectable } from '@angular/core';
-import { Task } from './list-task/models/task.model';
-import { CreateTaskDto } from './list-task/models/create-task.dto';
 import { BehaviorSubject, Observable } from 'rxjs';
-
+import { Task } from '../features/list-task/models/task.model';
+import { CreateTaskDto } from '../features/list-task/models/create-task.dto';
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: 'root'
 })
 export class TaskService {
-  private tasks: Task[] = [];
-  private nextId = 1;
 
-  constructor(){
-    this.tasks = [
-      {id: this.nextId++, title: "Manger des pommes", status: 'A faire'  },
-      {id: this.nextId++, title: "Travailler sur Angular", status: 'Terminé'  },
-      {id: this.nextId++, title: "Faire dodo", status: 'A faire'  }
-    ];
+  // BehaviorSubject interne privé
+  private _tasks = new BehaviorSubject<Task[]>([
+    { id: 1, title: "Manger des pommes", status: "A faire" },
+    { id: 2, title: "Travailler sur Angular", status: "Terminé" },
+    { id: 3, title: "Faire dodo", status: "A faire" }
+  ]);
+
+  // Observable 
+  tasks$: Observable<Task[]> = this._tasks.asObservable();
+
+  // Getter 
+  private get tasks(): Task[] {
+    return this._tasks.value;
   }
 
-  getAll(): Task[] {
-    return [...this.tasks];
-  }
-
-  //ajout nouvelle tâche
-  add(taskDto: CreateTaskDto): Task {
+  add(dto: CreateTaskDto) {
     const newTask: Task = {
-      id: this.nextId++,
-      title: taskDto.title,
-      status: "A faire",
+      id: Date.now(),
+      title: dto.title,
+      status: "A faire"
     };
-    this.tasks.push(newTask);
-    return newTask;
+    this._tasks.next([...this.tasks, newTask]);
   }
 
-  //update
-  updateTitle(id: number, title: string): void {
-    const task = this.tasks.find(t => t.id === id);
-    if (task) {
-      task.title = title;
-    } else {
-      console.warn(`Tâche avec id ${id} non trouvée.`);
-    }
+  updateTitle(id: number, title: string) {
+    const updated = this.tasks.map(t => t.id === id ? { ...t, title } : t);
+    this._tasks.next(updated);
   }
 
-  //inverser statut
-  toggleStatus(id: number): void {
-    const task = this.tasks.find(t => t.id === id);
-    if (task){
-      task.status = task.status === "A faire" ? "Terminé" : "A faire";
-    } else {
-      console.warn(`Tâche avec id ${id} non trouvée.`);
-    }
+  toggleStatus(id: number) {
+    const updated = this.tasks.map(t =>
+      t.id === id ? { ...t, status: t.status === "Terminé" ? "A faire" : "Terminé" }: t);
+    this._tasks.next(updated);
   }
 
-  //suppr
-  deleteTask(id: number): void {
-    this.tasks = this.tasks.filter(t => t.id !== id);
+  delete(id: number) {
+    const updated = this.tasks.filter(t => t.id !== id);
+    this._tasks.next(updated);
   }
-
- 
 }

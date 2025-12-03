@@ -1,44 +1,37 @@
 import { Component } from '@angular/core';
-import { Task } from './models/task.model';
+import { FormsModule } from '@angular/forms';
+import { AsyncPipe } from '@angular/common';
 import { TaskService } from '../task-service';
 import { TodoItem } from '../todo-item/todo-item';
-import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-list-task',
   standalone: true,
-  imports: [TodoItem, FormsModule],
+  imports: [FormsModule, AsyncPipe, TodoItem],
   templateUrl: './list-task.html',
-  styleUrls: ['./list-task.css'],
-  providers: [TaskService]
+  styleUrls: ['./list-task.css']
 })
 export class ListTask {
-  tasks: Task[] = [];
-    newTaskTitle = "";
+
+  tasks$;    // <-- déclaré mais non initialisé ici
+  newTaskTitle = '';
 
   constructor(private taskService: TaskService) {
-  }  ngOnInit(): void {
-    this.tasks = this.taskService.getAll();
+    this.tasks$ = this.taskService.tasks$;   // <-- initialisation ICI
   }
-  
-  addTask(title: string) {
-    this.taskService.add({ title });
-    this.tasks = this.taskService.getAll();
+
+
+  addTask() {
+    if (!this.newTaskTitle.trim()) return;
+    this.taskService.add({ title: this.newTaskTitle });
+    this.newTaskTitle = '';
+  }
+
+  deleteTask(id: number) {
+    this.taskService.delete(id);
   }
 
   toggleTaskStatus(id: number) {
     this.taskService.toggleStatus(id);
-    this.tasks = this.taskService.getAll();
-  }
-
-  deleteTask(id: number) {
-    this.taskService.deleteTask(id);
-    this.tasks = this.taskService.getAll();
-
-  }
-
-  // handler pour le clic sur le bouton de l'enfant
-  onTaskClicked(task: Task) {
-    this.toggleTaskStatus(task.id);
   }
 }
