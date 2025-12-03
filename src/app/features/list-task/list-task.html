@@ -5,12 +5,12 @@
 
 <ul>
   @for (task of tasks$ | async; track task.id) {
-    <app-todo-item
-      [id]="task.id"
-      [title]="task.title"
-      [status]="task.status"
-      (delete)="deleteTask(task.id)"
-      (toggle)="toggleTaskStatus(task.id)"
-    ></app-todo-item>
+  <app-todo-item 
+  [id]="task.id" 
+  [title]="task.title" 
+  [status]="task.status" 
+  (delete)="deleteTask(task.id)"
+  (toggle)="toggleTaskStatus(task.id)">
+</app-todo-item>
   }
 </ul>
