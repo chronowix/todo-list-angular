@@ -1,41 +1,32 @@
 import { Injectable } from '@angular/core';
-import { of, Observable } from 'rxjs';
-import { Task } from '../features/list-task/models/task.model';
+import { Observable, of } from 'rxjs';
 import { delay } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+import { environment } from '../../environments/environment.development';
+import { Task } from '../features/list-task/models/task.model';
 
 @Injectable({
   providedIn: 'root',
 })
 export class TaskApiService {
-  private tasks: Task[] = [
-    { id: 1, title: "Manger des pommes", status: "A faire" },
-    { id: 2, title: "Travailler sur Angular", status: "Terminé" },
-    { id: 3, title: "Faire dodo", status: "A faire" }
-  ];
+  private readonly baseUrl = environment.apiUrl + '/tasks';
 
-  private nextId = 4;
+  constructor(private http: HttpClient) { }
+
 
   getAll(): Observable<Task[]> {
-    return of([...this.tasks]).pipe(delay(200));
+    return this.http.get<Task[]>(this.baseUrl);
   }
 
-  create(task: Omit<Task, "id">): Observable<Task> {
-    const newTask: Task = { id: this.nextId++, ...task };
-    this.tasks.push(newTask);
-    return of(newTask).pipe(delay(200));
+  create(dto: Omit<Task, 'id'>): Observable<Task> {
+    return this.http.post<Task>(this.baseUrl, dto);
   }
 
-  update(id: number, changes: Partial<Task>): Observable<Task | undefined> {
-    const index = this.tasks.findIndex(t => t.id === id);
-    if (index === -1) return of(undefined).pipe(delay(200));
-
-    this.tasks[index] = { ...this.tasks[index], ...changes };
-    return of(this.tasks[index]).pipe(delay(200));
+  update(id: number, changes: Partial<Task>): Observable<Task> {
+    return this.http.patch<Task>(`${this.baseUrl}/${id}`, changes);
   }
 
-  delete(id: number): Observable<boolean> {
-    const before = this.tasks.length;
-    this.tasks = this.tasks.filter(t => t.id !== id);
-    return of(this.tasks.length < before).pipe(delay(200));
+  delete(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/${id}`);
   }
 }
